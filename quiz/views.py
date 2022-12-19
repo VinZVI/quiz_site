@@ -14,18 +14,37 @@ from .models import Question, Choice, Quiz, Profile
 def home(request):
 
     context = {}
-    return render(request, 'quiz/home.html', context=context)
+    return render(request, 'quiz/home.xhtml', context=context)
 
 
 @login_required()
 def user_home(request):
-    latest_quiz_list = Quiz.objects.order_by('-pub_date')[:5]
+    quiz_list = Quiz.published.all()
     context = {
-        'latest_quiz_list': latest_quiz_list,
+        'quiz_list': quiz_list,
     }
-    return render(request, 'quiz/user_home.html', context=context)
+    return render(request, 'quiz/user_home.xhtml', context=context)
 
+def quiz_detail(request, id): #year, month, day, post):
+    quiz = get_object_or_404(Quiz,
+                             id=id,
+                             status=Quiz.Status.PUBLISHED)
 
+    # quiz = get_object_or_404(Quiz,
+    #                          status=Quiz.Status.PUBLISHED,)
+                             # slug=post,
+                             # publish__year=year,
+                             # publish__month=month,
+                             # publish__day=day)
+    # List of active comments for this post
+    # comments = post.comments.filter(active=True)
+    # # Form for users to comment
+    # form = CommentForm()
+
+    return render(request, 'quiz/quiz_detail.xhtml',
+                  {'quiz': quiz})
+                   # 'comments': comments,
+                   # 'form': form})
 def user_login(request):
     title = "Login"
     if request.method == 'POST':

@@ -1,10 +1,24 @@
-{% extends 'base.html' %}
-{% block title %} Let's Quiz | Welcome {% endblock title %}
+{% extends 'base.xhtml' %}
+{% block title %} Quiz-App | Welcome {% endblock title %}
 {% block content %}
 <div class="container my-4">
     <div class="jumbotron">
 
-	      <h2 class="text-center text-info">Congratulations!! You have successfully logged in.</h2>
+        <h2 class="text-center text-info">Quiz: <span class="text-danger">{{ quiz.quiz_title }}</span></h2>
+
+        <div class="row">
+
+            <div class="card border-info mx-4 my-4">
+                <div class="card-body text-info">
+                    <h4 class="card-title">Description:</h4>
+                    <p class="card-text">
+                        {{ quiz.description|linebreaks }}
+                    </p>
+
+                </div>
+                <div class="card-footer">Published {{ quiz.publish }} by {{ quiz.author }}</div>
+            </div>
+        </div>
 	      <h3 class="text-info text-center">Before you play the quiz, here are the rules</h3>
 
         <div class="row">
@@ -27,7 +41,7 @@
                     </p>
                     <a href="{% url 'quiz:play' %}" class="btn btn-info">Let's play</a>
                 </div>  
-                <div class="card-footer">Rules last modified 08-March-2018</div>  
+<!--                <div class="card-footer">Published {{ quiz.publish }} by {{ quiz.author }}</div>-->
             </div>  
         </div>  
 

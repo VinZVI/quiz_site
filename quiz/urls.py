@@ -7,6 +7,7 @@ urlpatterns = [
 
     path('', views.home, name='home'),
     path('user-home/', views.user_home, name='user_home'),
+    path('<int:id>/', views.quiz_detail, name='quiz_detail'),
     path('play/', views.play, name='play'),
     path('leaderboard/', views.leaderboard, name='leaderboard'),
     #path(r'^submission-result/(?P<attempted_question_pk>\d+)/', views.submission_result, name='submission_result'),
