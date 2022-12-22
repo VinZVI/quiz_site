@@ -25,26 +25,57 @@ def user_home(request):
     }
     return render(request, 'quiz/user_home.xhtml', context=context)
 
-def quiz_detail(request, id): #year, month, day, post):
-    quiz = get_object_or_404(Quiz,
-                             id=id,
-                             status=Quiz.Status.PUBLISHED)
-
+def quiz_detail(request, year, month, day, slug):
     # quiz = get_object_or_404(Quiz,
-    #                          status=Quiz.Status.PUBLISHED,)
-                             # slug=post,
-                             # publish__year=year,
-                             # publish__month=month,
-                             # publish__day=day)
-    # List of active comments for this post
-    # comments = post.comments.filter(active=True)
-    # # Form for users to comment
-    # form = CommentForm()
+    #                          id=id,
+    #                          status=Quiz.Status.PUBLISHED)
+
+    quiz = get_object_or_404(Quiz,
+                             status=Quiz.Status.PUBLISHED,
+                             slug=slug,
+                             publish__year=year,
+                             publish__month=month,
+                             publish__day=day)
+
 
     return render(request, 'quiz/quiz_detail.xhtml',
                   {'quiz': quiz})
-                   # 'comments': comments,
-                   # 'form': form})
+
+@login_required()
+def play(request, quiz_id):
+    quiz = Quiz.objects.get(id=quiz_id)
+    #question = Question.objects.get(id=question_id)
+    quiz_profile, created = Profile.objects.get_or_create(user=request.user, quiz=quiz,)
+    if request.method == 'POST':
+
+        question_pk = request.POST.get('question_pk')
+
+        #use_question = quiz_profile.question
+
+        choice_pk = request.POST.get('choice_pk')
+
+        try:
+            selected_choice = quiz_profile.question.choices.get(pk=choice_pk)
+        except ObjectDoesNotExist:
+            raise Http404
+
+        quiz_profile.evaluate_attempt(quiz_profile, selected_choice)
+
+        return redirect(quiz_profile, quiz_id=quiz_id)
+
+    else:
+        question = quiz.get_question()
+        if question is not None:
+            quiz_profile.create_attempt(question)
+
+        context = {
+            'question': question,
+        }
+
+        return render(request, 'quiz/play.xhtml', context=context)
+
+
+
 def user_login(request):
     title = "Login"
     if request.method == 'POST':
@@ -82,36 +113,36 @@ def leaderboard(request):
     return render(request, 'quiz/leaderboard.html', context=context)
 
 
-@login_required()
-def play(request):
-    quiz_profile, created = Profile.objects.get_or_create(user=request.user)
-
-    if request.method == 'POST':
-        question_pk = request.POST.get('question_pk')
-
-        attempted_question = quiz_profile.attempts.select_related('question').get(question__pk=question_pk)
-
-        choice_pk = request.POST.get('choice_pk')
-
-        try:
-            selected_choice = attempted_question.question.choices.get(pk=choice_pk)
-        except ObjectDoesNotExist:
-            raise Http404
-
-        quiz_profile.evaluate_attempt(attempted_question, selected_choice)
-
-        return redirect(attempted_question)
-
-    else:
-        question = quiz_profile.get_new_question()
-        if question is not None:
-            quiz_profile.create_attempt(question)
-
-        context = {
-            'question': question,
-        }
-
-        return render(request, 'quiz/play.html', context=context)
+# @login_required()
+# def play(request):
+#     quiz_profile, created = Profile.objects.get_or_create(user=request.user)
+#
+#     if request.method == 'POST':
+#         question_pk = request.POST.get('question_pk')
+#
+#         attempted_question = quiz_profile.attempts.select_related('question').get(question__pk=question_pk)
+#
+#         choice_pk = request.POST.get('choice_pk')
+#
+#         try:
+#             selected_choice = attempted_question.question.choices.get(pk=choice_pk)
+#         except ObjectDoesNotExist:
+#             raise Http404
+#
+#         quiz_profile.evaluate_attempt(attempted_question, selected_choice)
+#
+#         return redirect(attempted_question)
+#
+#     else:
+#         question = quiz_profile.get_new_question()
+#         if question is not None:
+#             quiz_profile.create_attempt(question)
+#
+#         context = {
+#             'question': question,
+#         }
+#
+#         return render(request, 'quiz/play.html', context=context)
 
 
 @login_required()

@@ -12,13 +12,14 @@
             <div class="card border-info mx-4 my-4">
                 <div class="card-body text-info">
                     <h4 class="card-title">
-                        <a href="{% url 'quiz:quiz_detail' quiz.id %}">
+                        <a href="{{ quiz.get_absolute_url }}">
                                 Quiz: {{ quiz.quiz_title }}
                         </a>
                     </h4>
                     <p class="card-text">
                            {{ quiz.description|truncatewords:30|linebreaks }}
                     </p>
+
                     <a href="{% url 'quiz:play' %}" class="btn btn-info">Let's play</a>
                 </div>  
                 <div class="card-footer">Published {{ quiz.publish }} by {{ quiz.author }}</div>
