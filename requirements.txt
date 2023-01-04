@@ -1,0 +1,5 @@
+Django
+django-crispy-forms
+django-model-utils
+Pillow
+pytz

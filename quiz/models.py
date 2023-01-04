@@ -125,7 +125,7 @@ class Profile(models.Model):
 class AttemptedQuiz(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     quiz_profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='attempts_quiz')
-    date_of_birth = models.DateField(blank=True, null=True)
+    date_of_birth = models.DateField(auto_now_add=True, blank=True, null=True)
     total_score = models.DecimalField(_('Total Score'), default=0, decimal_places=2, max_digits=10)
     attempt_number = models.SmallIntegerField(_('Number Attempt'), default=0, null=False)
 
