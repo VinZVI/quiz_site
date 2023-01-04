@@ -93,6 +93,8 @@ def play(request, year, month, day, slug):
             # attempted_quiz = AttemptedQuiz.objects.filter(quiz_profile=quiz_profile, attempted_quiz=last_attempt_quiz).get()
 
             last_attempt_quiz.total_score = quiz_profile.total_score
+            quiz_profile.total_score = 0
+            quiz_profile.save()
             last_attempt_quiz.save()
 
         context = {
@@ -123,21 +125,21 @@ def user_login(request):
         if form.is_valid():
             cd = form.cleaned_data
             try:
-                    user = User.objects.get(username=cd['username'])
-                except User.DoesNotExist:
-                    user = None
-                # user = authenticate(request,
-                #                     username=cd['username'],
-                #                     password=cd['password'])
-                if user is not None:
-                    if user.is_active:
-                        login(request, user, backend=settings.AUTHENTICATION_BACKENDS[0])
-                        return redirect('/choose_of_quizzes')
-                        #return HttpResponse('Authenticated successfully')
-                    else:
-                        return HttpResponse('Disabled account')
+                user = User.objects.get(username=cd['username'])
+            except User.DoesNotExist:
+                user = None
+            # user = authenticate(request,
+            #                     username=cd['username'],
+            #                     password=cd['password'])
+            if user is not None:
+                if user.is_active:
+                    login(request, user, backend=settings.AUTHENTICATION_BACKENDS[0])
+                    return redirect('/choose_of_quizzes')
+                    # return HttpResponse('Authenticated successfully')
                 else:
-                    return HttpResponse('Invalid login')
+                    return HttpResponse('Disabled account')
+            else:
+                return HttpResponse('Invalid login')
     else:
         form = LoginForm()
     return render(request, 'quiz/login.xhtml', {'form': form, "title": title})
