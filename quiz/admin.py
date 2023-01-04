@@ -2,7 +2,6 @@ from django.contrib import admin
 
 from .models import Question, Choice, Quiz
 
-
 # admin.site.register(Choice)
 
 admin.site.site_header = "Quizzes Admin"
@@ -13,7 +12,7 @@ admin.site.index_title = "Welcome to the Quizzes Admin Area"
 class ChoiceInLine(admin.TabularInline):
     model = Choice
     extra = 3
-    max_num = 3
+    max_num = 4
     can_delete = False
 
 class QuestionInLine(admin.StackedInline):
@@ -45,7 +44,7 @@ class QuestionAdmin(admin.ModelAdmin):
     #raw_id_fields = ['quiz']
     #date_hierarchy = 'quiz'
     ordering = ['quiz']
-    fields = ('question_text', 'slug', 'quiz')
+    fields = ('question_text', 'slug', 'quiz', 'description')
     # fieldsets = [(None, {'fields': ['question_text']}), ('Date Information', {
     #     'fields': [], 'classes': ['collapse']}), ]
     inlines = [ChoiceInLine]

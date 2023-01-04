@@ -1,25 +1,33 @@
 {% extends 'base.xhtml' %}
-{% block title %} Let's Quiz | Leaderboard {% endblock title %}
+{% block title %} Quiz-App | Leaderboard {% endblock title %}
 {% block content %}
-<div class="container">
-    <h1 class="text-center my-4"><span class="badge badge-info"><i class="fa fa-trophy" aria-hidden="true"></i> TOP {{ total_count }} PLAYERS <i class="fa fa-trophy" aria-hidden="true"></i></span></h1>
-    <table class="table table-striped table-bordered">
-        <thead>
+    <div class="container">
+        <h1 class="text-center my-4">
+        <span class="badge badge-info">
+            <i class="fa fa-trophy" aria-hidden="true"></i>
+            TOP {{ total_count }} PLAYERS FOR QUIZ - <span class="text-danger">{{ used_quiz.quiz_title }}</span>
+            <i class="fa fa-trophy" aria-hidden="true"></i>
+        </span>
+        </h1>
+        <table class="table table-striped table-bordered">
+            <thead>
             <tr>
                 <th>Position</th>
-                <th>Username</th>
+                <th>Username/Attempt number</th>
                 <th>Score</th>
             </tr>
-        </thead>
-        <tbody>
-            {% for quiz_profile in top_quiz_profiles %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ quiz_profile.user.username }}</td>
-                <td>{{ quiz_profile.total_score }}</td>
-            </tr>
+            </thead>
+            <tbody>
+            {% for attempted_quiz in top_attempted_quiz %}
+                {% if attempted_quiz.total_score > 0 %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ attempted_quiz.quiz_profile.user.username }}/{{ attempted_quiz.attempt_number }}</td>
+                        <td>{{ attempted_quiz.total_score }}</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
-        </tbody>
-    </table>
-</div>
+            </tbody>
+        </table>
+    </div>
 {% endblock content %}

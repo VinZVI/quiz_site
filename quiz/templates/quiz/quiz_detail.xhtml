@@ -34,16 +34,20 @@
                             </li>
                             <li>Every question is displayed only once per user.</li>
                             <li>Try to answer as quickly as you can.</li>
-                            <li>If you press refresh or go back to the previous page, there will be a new question for you and the question you were on will be counted as attempted.</li>
+                            <li>If you press refresh or go back to the previous page, there will be a new question for
+                                you and the question you were on will be counted as attempted.
+                            </li>
                             <li>Questions are displayed randomly for every user.</li>
-                            <li>You will be told immediately whether your answer was correct or incorrect once you submit the answer.</li>
+                            <li>You will be told immediately whether your answer was correct or incorrect once you
+                                submit the answer.
+                            </li>
                         </ul>
                     </p>
-                    <a href="{% url 'quiz:play' quiz.id %}" class="btn btn-info">Let's play</a>
-                </div>  
-<!--                <div class="card-footer">Published {{ quiz.publish }} by {{ quiz.author }}</div>-->
-            </div>  
-        </div>  
+                    <a href="/play{{ quiz.get_absolute_url }}" class="btn btn-info">Let's play</a>
+                </div>
+                <!--                <div class="card-footer">Published {{ quiz.publish }} by {{ quiz.author }}</div>-->
+            </div>
+        </div>
 
     </div>
 </div>

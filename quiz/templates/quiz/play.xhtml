@@ -1,22 +1,24 @@
 {% extends 'base.xhtml' %}
 
 {% block content %}
-{% if question is None %}
+    {% if question is None %}
 
-<div class="container">
-  <div class="jumbotron my-4">
-    <h1> You have already answered all of our questions. </h1>
-    <a href="{% url 'quiz:leaderboard' %}" class="btn btn-lg btn-info"><i class="fa fa-trophy" aria-hidden="true"></i> See the leaderboard here <i class="fa fa-trophy" aria-hidden="true"></i></a>
-  </div>
-</div>
+        <div class="container">
+            <div class="jumbotron my-4">
+                <h1> You have already answered all of our questions. </h1>
+                <a href="/leaderboard{{ used_quiz.get_absolute_url }}" class="btn btn-lg btn-info"><i
+                        class="fa fa-trophy" aria-hidden="true"></i> See the leaderboard here <i class="fa fa-trophy"
+                                                                                                 aria-hidden="true"></i></a>
+            </div>
+        </div>
 
-{% else %}
+    {% else %}
 
-<div class="container">
-  <div class="jumbotron my-4">
+        <div class="container">
+        <div class="jumbotron my-4">
 
-    <h3 class="text-info">{{ question.question_text|safe }}</h3>
-    <form class="form" action="" method="post">
+            <h3 class="text-info">{{ question.question_text|safe }}</h3>
+            <form class="form" action="" method="post">
         {% csrf_token %}
         <input type="hidden" name="question_pk" value="{{ question.pk }}">
         {% for choice in question.choices.all %}

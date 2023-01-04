@@ -20,29 +20,32 @@
 
 </head>
 <body class="bg-light">
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-        <div class="container">
-            <h1><a href="{% url 'quiz:home' %}" class="navbar-brand">
+<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <div class="container">
+        <h1><a href="{% url 'quiz:home' %}" class="navbar-brand">
             <strong>Quiz-App</strong></a></h1>
-            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-            <div class="collapse navbar-collapse justify-content-end " id="navbar">
-                {% if not request.user.is_active %}
-                <a href="{% url 'quiz:leaderboard' %}" class="btn btn-info mt-1 mx-1">Leaderboard</a>
-                <a href="{% url 'quiz:login' %}" class="btn btn-info mt-1"><i class="fa fa-sign-in" aria-hidden="true"></i> Log In</a>
-                {% else %}
+        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar" aria-controls="navbar"
+                aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse justify-content-end " id="navbar">
+            {% if not request.user.is_active %}
+                {#                <a href="{% url 'quiz:leaderboard' %}" class="btn btn-info mt-1 mx-1">Leaderboard</a>#}
+                <a href="{% url 'quiz:login' %}" class="btn btn-info mt-1"><i class="fa fa-sign-in"
+                                                                              aria-hidden="true"></i> Log In</a>
+            {% else %}
                 <h6 class="text-white mt-2 mr-2">Welcome, {{ request.user.username }} | </h6>
-                <h6 class="text-white mt-2 mr-2"><a href="{% url 'quiz:leaderboard' %}" class="text-white">Leaderboard</a> |</h6>
-{#                <h6 class="mt-2"><a href="{% url 'quiz:play' %}" class="text-white">Let's play</a></h6>#}
-                <a href="{% url 'quiz:logout' %}" class="btn btn-danger mt-1 mx-1">Log Out <i class="fa fa-sign-out" aria-hidden="true"></i></a>
-                {% endif %}
-            </div>
+                {#                <h6 class="text-white mt-2 mr-2"><a href="{% url 'quiz:leaderboard' %}" class="text-white">Leaderboard</a> |</h6>#}
+                <h6 class="mt-2"><a href="{% url 'quiz:choose_of_quizzes' %}" class="text-white">Let's play</a></h6>
+                <a href="{% url 'quiz:logout' %}" class="btn btn-danger mt-1 mx-1">Log Out <i class="fa fa-sign-out"
+                                                                                              aria-hidden="true"></i></a>
+            {% endif %}
         </div>
+    </div>
 
-    </nav>
+</nav>
 
-    {% block content %}
-    {% endblock content %}
-    <footer class="bg-light text-muted py-0">
+{% block content %}
+{% endblock content %}
+<footer class="bg-light text-muted py-0">
         <div class="container py-4">
             <ul class="list-inline mb-0 text-center">
                 <li class="list-inline-item">&copy; 2022 Quiz-App.</li>
