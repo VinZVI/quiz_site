@@ -25,15 +25,14 @@ def choose_of_quizzes(request):
     }
     return render(request, 'quiz/choose_of_quizzes.xhtml', context=context)
 
-def quiz_detail(request, year, month, day, slug):
 
+def quiz_detail(request, year, month, day, slug):
     quiz = get_object_or_404(Quiz,
                              status=Quiz.Status.PUBLISHED,
                              slug=slug,
                              publish__year=year,
                              publish__month=month,
                              publish__day=day)
-
 
     return render(request, 'quiz/quiz_detail.xhtml',
                   {'quiz': quiz})
@@ -160,9 +159,6 @@ def leaderboard(request, year, month, day, slug):
         'used_quiz': used_quiz,
     }
     return render(request, 'quiz/leaderboard.xhtml', context=context)
-
-
-
 
 
 # def login_view(request):
