@@ -6,6 +6,8 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from quiz_app.quiz.file_parsing import excel_parser
+
 
 # Create your models here.
 
@@ -23,7 +25,7 @@ class Quiz(models.Model):
     quiz_title = models.CharField(max_length=250)
     slug = models.SlugField(max_length=250,
                             unique_for_date='publish')  # уникальные slug для даты публикации
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quizzes')
 
     description = models.TextField(blank=False)
     publish = models.DateTimeField('date published', auto_now_add=True)
@@ -53,7 +55,7 @@ class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     question_text = models.CharField(max_length=250)
     description = models.TextField()
-    slug = models.SlugField(max_length=250, unique=True)
+    slug = models.SlugField(max_length=250)  # unique=True)
     maximum_marks = models.DecimalField(_('Maximum Marks'), default=4, decimal_places=2, max_digits=6)
 
     def __str__(self):
@@ -83,7 +85,23 @@ class Profile(models.Model):
     attempted_quiz_flag = models.BooleanField(_('Is the attempt over?'), default=True, null=False)
 
     def __str__(self):
-        return f'<QuizProfile: user={self.user}>'
+        return self.user.username
+
+    def create_quiz(self, file_object):
+        flag = True
+        file_name = file_object.name
+        quiz = file_object.quiz
+        try:
+            questions = excel_parser(file_name)
+            for items_question in questions:
+                question = Question(quiz=quiz,
+                                    question_text=items_question[0],
+                                    description=items_question[1])
+                for item in items_question[2:]:
+                    choice = Choice(question=question, choice_text=item[0], is_correct=item[1])
+        except FileNotFoundError:
+            flag = False
+        return quiz, flag
 
     def create_attempt_quiz(self, quiz, attempt_number):
         attempted_quiz = AttemptedQuiz(quiz=quiz, quiz_profile=self, attempt_number=attempt_number)
@@ -113,10 +131,11 @@ class Profile(models.Model):
             attempted_question.marks_obtained = attempted_question.question.maximum_marks
 
         attempted_question.save()
-        self.update_score()
+        attempted_quiz = attempted_question.attempted_quiz
+        self.update_score(attempted_quiz)
 
-    def update_score(self):
-        marks_sum = self.attempts.filter(is_correct=True).aggregate(
+    def update_score(self, attempted_quiz):
+        marks_sum = self.attempts.filter(is_correct=True, attempted_quiz=attempted_quiz).aggregate(
             models.Sum('marks_obtained'))['marks_obtained__sum']
         self.total_score = marks_sum or 0
         self.save()
@@ -130,7 +149,10 @@ class AttemptedQuiz(models.Model):
     attempt_number = models.PositiveIntegerField(_('Number Attempt'), default=0, null=False)
 
     def get_absolute_url(self):
-        return f'/submission-result/{self.pk}/'
+        return reverse('quiz:attempted_quiz_detail',
+                       args=[self.quiz,
+                             self.quiz_profile,
+                             self.attempt_number])
 
 
 class AttemptedQuestion(models.Model):
@@ -143,3 +165,15 @@ class AttemptedQuestion(models.Model):
 
     def get_absolute_url(self):
         return f'/submission-result/{self.pk}/'
+
+
+class File(models.Model):
+    owner = models.ForeignKey(User,
+                              related_name='file_profile_related',
+                              on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz,
+                             related_name='file_quiz_related',
+                             on_delete=models.CASCADE)
+    title = models.CharField(max_length=250)
+    created = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='files')

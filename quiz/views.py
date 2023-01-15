@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -6,10 +7,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
+from django.utils.text import slugify
+from unidecode import unidecode
 
 from .forms import LoginForm
-from .forms import RegistrationForm
-from .models import Quiz, Profile, AttemptedQuestion, AttemptedQuiz
+from .forms import RegistrationForm, FileEditForm, QuizForm
+from .models import Quiz, Profile, AttemptedQuestion, AttemptedQuiz, File
 
 
 def home(request):
@@ -38,6 +41,44 @@ def quiz_detail(request, year, month, day, slug):
                   {'quiz': quiz})
 
 
+@login_required
+def quiz_edit(request):
+    if request.method == 'POST':
+        slugify_field = slugify(unidecode(request.POST.get('quiz_title')))
+        quiz, create = Quiz.objects.get_or_create(author=request.user,
+                                                  slug=slugify_field)
+
+        quiz_form = QuizForm(initial={'slug': slugify_field},
+                             instance=quiz,
+                             data=request.POST)
+
+        file_model, create = File.objects.get_or_create(owner=request.user,
+                                                        quiz=quiz)
+        file_form = FileEditForm(instance=file_model,
+                                 data=request.POST,
+                                 files=request.FILES)
+
+        quiz_profile, created = Profile.objects.get_or_create(user=request.user,
+                                                              quiz=quiz, )
+
+        if quiz_form.is_valid() and file_form.is_valid():
+            # print('yes')
+            quiz_form.save()
+            file_form.save()
+            quiz, create = quiz_profile.create_quiz(file_model)
+
+        else:
+            messages.error(request, 'Error create your Quiz')
+    else:
+        quiz_form = QuizForm(instance=request.user)
+        file_form = FileEditForm(
+            instance=request.user)
+    return render(request,
+                  'quiz/quiz_edit.xhtml',
+                  {'quiz_form': quiz_form,
+                   'file_form': file_form})
+
+
 @login_required()
 def play(request, year, month, day, slug):
     quiz = get_object_or_404(Quiz,
@@ -52,13 +93,9 @@ def play(request, year, month, day, slug):
         quiz_profile.create_attempt_quiz(quiz, 1)
         quiz_profile.attempted_quiz_flag = False
         quiz_profile.save()
-    try:
-        last_attempt_quiz = quiz_profile.attempts_quiz.latest('attempt_number')
-        last_attempt_number = last_attempt_quiz.attempt_number  # last_attempt_number[0][0]
-    except:
-        quiz_profile.create_attempt_quiz(quiz, 1)
-        quiz_profile.attempted_quiz_flag = False
-        last_attempt_number = quiz_profile.attempts_quiz.reverse().values_list('attempt_number')
+
+    last_attempt_quiz = quiz_profile.attempts_quiz.latest('attempt_number')
+    last_attempt_number = last_attempt_quiz.attempt_number  # last_attempt_number[0][0]
 
     if quiz_profile.attempted_quiz_flag:
         last_attempt_number += 1
