@@ -10,7 +10,7 @@ from django.shortcuts import render
 from django.utils.text import slugify
 from unidecode import unidecode
 
-from .forms import LoginForm
+from .forms import LoginForm, QuestionFormset
 from .forms import RegistrationForm, FileEditForm, QuizForm
 from .models import Quiz, Profile, AttemptedQuestion, AttemptedQuiz, File
 
@@ -43,29 +43,36 @@ def quiz_detail(request, year, month, day, slug):
 
 @login_required
 def quiz_edit(request):
+    quiz, created_quiz = Quiz.objects.get_or_create(author=request.user,
+                                                    # quiz_title=request.POST.get('quiz_title'),
+                                                    id=2)
+
+    file_model, created_question = File.objects.get_or_create(owner=request.user,
+                                                              quiz=quiz)
+
+    quiz_profile, created_profile = Profile.objects.get_or_create(user=request.user,
+                                                                  quiz=quiz)
+
     if request.method == 'POST':
         slugify_field = slugify(unidecode(request.POST.get('quiz_title')))
-        quiz, create = Quiz.objects.get_or_create(author=request.user,
-                                                  slug=slugify_field)
 
         quiz_form = QuizForm(initial={'slug': slugify_field},
                              instance=quiz,
                              data=request.POST)
 
-        file_model, create = File.objects.get_or_create(owner=request.user,
-                                                        quiz=quiz)
         file_form = FileEditForm(instance=file_model,
                                  data=request.POST,
                                  files=request.FILES)
 
-        quiz_profile, created = Profile.objects.get_or_create(user=request.user,
-                                                              quiz=quiz, )
-
         if quiz_form.is_valid() and file_form.is_valid():
-            # print('yes')
+            file_form.cleaned_data
+            quiz, created_quiz_from_file = quiz_profile.create_quiz_from_file(file_model)
+            questions_formset = QuestionFormset(request.POST, instance=quiz)
             quiz_form.save()
             file_form.save()
-            quiz, create = quiz_profile.create_quiz(file_model)
+            if questions_formset.is_valid():
+                questions_formset.save()
+
 
         else:
             messages.error(request, 'Error create your Quiz')
@@ -73,10 +80,12 @@ def quiz_edit(request):
         quiz_form = QuizForm(instance=request.user)
         file_form = FileEditForm(
             instance=request.user)
+        questions_formset = QuestionFormset(instance=quiz)
     return render(request,
                   'quiz/quiz_edit.xhtml',
                   {'quiz_form': quiz_form,
-                   'file_form': file_form})
+                   'file_form': file_form,
+                   'questions_formset': questions_formset})
 
 
 @login_required()

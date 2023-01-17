@@ -4,9 +4,11 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
+from django.utils.text import slugify
 from django.utils.translation import gettext as _
+from unidecode import unidecode
 
-from quiz_app.quiz.file_parsing import excel_parser
+from .file_parsing import excel_parser
 
 
 # Create your models here.
@@ -52,10 +54,10 @@ class Quiz(models.Model):
 
 
 class Question(models.Model):
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    question_text = models.CharField(max_length=250)
+    quiz = models.ForeignKey(Quiz, related_name='questions', on_delete=models.CASCADE)
+    question_text = models.CharField(max_length=500)
     description = models.TextField()
-    slug = models.SlugField(max_length=250)  # unique=True)
+    slug = models.SlugField(max_length=500, default=0)  # unique=True)
     maximum_marks = models.DecimalField(_('Maximum Marks'), default=4, decimal_places=2, max_digits=6)
 
     def __str__(self):
@@ -87,18 +89,21 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
-    def create_quiz(self, file_object):
+    def create_quiz_from_file(self, file_object):
         flag = True
-        file_name = file_object.name
+        file_name = file_object.file.file
         quiz = file_object.quiz
         try:
             questions = excel_parser(file_name)
             for items_question in questions:
                 question = Question(quiz=quiz,
                                     question_text=items_question[0],
-                                    description=items_question[1])
+                                    description=items_question[1],
+                                    slug=slugify(unidecode(items_question[0])))
+                question.save()
                 for item in items_question[2:]:
                     choice = Choice(question=question, choice_text=item[0], is_correct=item[1])
+                    choice.save()
         except FileNotFoundError:
             flag = False
         return quiz, flag

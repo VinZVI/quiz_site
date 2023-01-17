@@ -7,7 +7,7 @@ def excel_parser(name_file):
     sheet = wb.active
     # получим макс количество строк в документе
     rows = sheet.max_row
-    print(rows)
+    # print(rows)
     # проходим по всем значениям колонки B
     questions = []
     question = []

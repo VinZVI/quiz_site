@@ -20,8 +20,27 @@
                                     {{ file_form.files.file.name }}
                                 </p>
                             {% endif %}
+                            {{ questions_formset.management_form }}
+                            {{ questions_formset.non_form_errors }}
+
+                            {% for question_form in questions_formset.forms %}
+                                {{ question_form.as_p }}
+
+                                {% if question_form.nested %}
+                                    {{ question_form.nested.management_form }}
+                                    {{ question_form.nested.non_form_errors }}
+
+                                    {% for nested_form in question_form.nested.forms %}
+                                        {{ nested_form.as_p }}
+                                    {% endfor %}
+
+                                {% endif %}
+
+                            {% endfor %}
                             {% csrf_token %}
-                            <p><input type="submit" value="Save changes"></p>
+                            <p>
+                                <input type="submit" value="Save changes">
+                            </p>
                         </form>
 
 

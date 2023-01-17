@@ -64,37 +64,90 @@ class QuizForm(forms.ModelForm):
         fields = ['quiz_title', 'slug', 'description', 'status']
 
 
-class QuestionForm(forms.ModelForm):
-    class Meta:
-        model = Question
-        fields = ['quiz', 'question_text', 'description']
-        widgets = {
-            'question_text': forms.Textarea(attrs={'rows': 3, 'cols': 80}),
-        }
+from django.forms.models import inlineformset_factory
+from django.forms.models import BaseInlineFormSet
+
+ChoiceFormset = inlineformset_factory(Question,
+                                      Choice,
+                                      fields=('choice_text',
+                                              'is_correct',),
+                                      extra=4,
+                                      max_num=4)
 
 
-class ChoiceForm(forms.ModelForm):
-    class Meta:
-        model = Choice
-        fields = ['choice_text', 'is_correct']
-        widgets = {
-            'html': forms.Textarea(attrs={'rows': 2, 'cols': 80}),
-        }
+class BaseQuestionFormset(BaseInlineFormSet):
+    def add_fields(self, form, index):
+        super(BaseQuestionFormset, self).add_fields(form, index)
 
+        # save the formset in the 'nested' property
+        form.nested = ChoiceFormset(
+            instance=form.instance,
+            # data=form.data if form.is_bound else None,)
+            # files=form.files if form.is_bound else None,
+            prefix='choice-%s-%s' % (
+                form.prefix,
+                ChoiceFormset.get_default_prefix()))
+        # extra=4)
 
-class ChoiceInlineFormset(forms.BaseInlineFormSet):
-    def clean(self):
-        super(ChoiceInlineFormset, self).clean()
+    def is_valid(self):
+        result = super(BaseQuestionFormset, self).is_valid()
 
-        correct_choices_count = 0
+        if self.is_bound:
+            for form in self.forms:
+                if hasattr(form, 'nested'):
+                    result = result and form.nested.is_valid()
+
+        return result
+
+    def save(self, commit=True):
+
+        result = super(BaseQuestionFormset, self).save(commit=commit)
+
         for form in self.forms:
-            if not form.is_valid():
-                return
+            if hasattr(form, 'nested'):
+                if not self._should_delete_form(form):
+                    form.nested.save(commit=commit)
 
-            if form.cleaned_data and form.cleaned_data.get('is_correct') is True:
-                correct_choices_count += 1
+        return result
 
-        # try:
-        #     assert correct_choices_count == Question.ALLOWED_NUMBER_OF_CORRECT_CHOICES
-        # except AssertionError:
-        #     raise forms.ValidationError(_('Exactly one correct choice is allowed.'))
+
+QuestionFormset = inlineformset_factory(Quiz, Question,
+                                        formset=BaseQuestionFormset,
+                                        fields=('question_text', 'description', 'maximum_marks',),
+                                        extra=3,
+                                        max_num=2)
+
+# class QuestionForm(forms.ModelForm):
+#     class Meta:
+#         model = Question
+#         fields = ['quiz', 'question_text', 'description']
+#         widgets = {
+#             'question_text': forms.Textarea(attrs={'rows': 3, 'cols': 80}),
+#         }
+#
+#
+# class ChoiceForm(forms.ModelForm):
+#     class Meta:
+#         model = Choice
+#         fields = ['choice_text', 'is_correct']
+#         widgets = {
+#             'html': forms.Textarea(attrs={'rows': 2, 'cols': 80}),
+#         }
+
+
+# class ChoiceInlineFormset(forms.BaseInlineFormSet):
+#     def clean(self):
+#         super(ChoiceInlineFormset, self).clean()
+#
+#         correct_choices_count = 0
+#         for form in self.forms:
+#             if not form.is_valid():
+#                 return
+#
+#             if form.cleaned_data and form.cleaned_data.get('is_correct') is True:
+#                 correct_choices_count += 1
+
+# try:
+#     assert correct_choices_count == Question.ALLOWED_NUMBER_OF_CORRECT_CHOICES
+# except AssertionError:
+#     raise forms.ValidationError(_('Exactly one correct choice is allowed.'))
