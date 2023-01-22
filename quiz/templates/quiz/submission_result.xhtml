@@ -1,10 +1,11 @@
 {% extends 'base.xhtml' %}
+{% load quiz_tags %}
 {% block title %} Quiz-App | Submission Result {% endblock title %}
 {% block content %}
     <div class="container">
         <div class="jumbotron my-4">
 
-            <h3 class="text-info">{{ attempted_question.question.question_text|safe }}</h3>
+            <h3 class="text-info">{{ attempted_question.question.question_text|markdown|safe }}</h3>
 
             <p>
                 <strong>Your answer: </strong>

@@ -1,5 +1,5 @@
 {% extends 'base.xhtml' %}
-
+{% load quiz_tags %}
 {% block content %}
     {% if question is None %}
 
@@ -17,7 +17,7 @@
         <div class="container">
         <div class="jumbotron my-4">
 
-            <h3 class="text-info">{{ question.question_text|safe }}</h3>
+            <h3 class="text-info">{{ question.question_text|markdown|safe }}</h3>
             <form class="form" action="" method="post">
         {% csrf_token %}
         <input type="hidden" name="question_pk" value="{{ question.pk }}">
@@ -30,7 +30,7 @@
           </div>
 
         {% endfor %}
-        <input class="btn btn-info btn-lg" type="submit" value="Submit">  
+        <input class="btn btn-info btn-lg" type="submit" value="Submit">
     </form>
   </div>
 </div>

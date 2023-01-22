@@ -51,9 +51,9 @@ class Quiz(models.Model):
 
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    question_text = models.CharField(max_length=250)
+    question_text = models.TextField(max_length=500)
     description = models.TextField()
-    slug = models.SlugField(max_length=250, unique=True)
+    slug = models.SlugField(max_length=500, unique=True)
     maximum_marks = models.DecimalField(_('Maximum Marks'), default=4, decimal_places=2, max_digits=6)
 
     def __str__(self):
@@ -113,10 +113,11 @@ class Profile(models.Model):
             attempted_question.marks_obtained = attempted_question.question.maximum_marks
 
         attempted_question.save()
-        self.update_score()
+        attempted_quiz = attempted_question.attempted_quiz
+        self.update_score(attempted_quiz)
 
-    def update_score(self):
-        marks_sum = self.attempts.filter(is_correct=True).aggregate(
+    def update_score(self, attempted_quiz):
+        marks_sum = self.attempts.filter(is_correct=True, attempted_quiz=attempted_quiz).aggregate(
             models.Sum('marks_obtained'))['marks_obtained__sum']
         self.total_score = marks_sum or 0
         self.save()

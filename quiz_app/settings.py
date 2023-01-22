@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-ob%b+-q1ej7pt(-@yl!+_$41@f4&6dv@j261@)*_@amr+y_)g^"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['vinzvi.pythonanywhere.com']
 
 
 # Application definition
@@ -120,7 +120,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_DIRS = [BASE_DIR / 'quiz_app' / 'static']
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
@@ -132,3 +132,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/user_home'
+
+MEDIA_URL = '/media/'
+STATIC_ROOT = Path(BASE_DIR / 'quiz_app' / 'static')
+MEDIA_ROOT = Path(BASE_DIR /'quiz_app' / 'media')
