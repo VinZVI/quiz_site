@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 class LoginForm(forms.Form):
     username = forms.CharField()
-    # password = forms.CharField(widget=forms.PasswordInput)
+    password = forms.CharField(widget=forms.PasswordInput)
 
 
 class RegistrationForm(UserCreationForm):
@@ -20,8 +20,8 @@ class RegistrationForm(UserCreationForm):
             'first_name',
             'last_name',
             'email',
-            # 'password1',
-            # 'password2',
+            'password1',
+            'password2',
         ]
 
     def save(self, commit=True):
