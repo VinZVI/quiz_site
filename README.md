@@ -9,6 +9,8 @@
 
 Project website [Quiz-App](http://vinzvi.pythonanywhere.com/).
 
+![](https://github.com/VinZVI/quiz_site/blob/9c2da13e6a8b23955d9d4f8b25399698282e3c3c/Quiz-App.png)
+
 In this application, users can post their tests (quizzes) and take other tests posted on the site.
 
 
